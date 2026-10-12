@@ -1,0 +1,1148 @@
+<!doctype html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#151714">
+<meta name="description" content="Hype Tickets - vizuelni demo kataloga događaja sa draft importom.">
+<title>Hype Tickets - katalog demo</title>
+<style>
+:root{
+  --ink:#171914;
+  --muted:#6f7569;
+  --paper:#f5f4ef;
+  --card:#fffefa;
+  --line:#e2e4da;
+  --lime:#d8ff54;
+  --acid:#c6ed3d;
+  --red:#ff715b;
+  --shadow:0 22px 60px rgba(28,34,22,.09);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  letter-spacing:0;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.app{min-height:100vh}
+.topbar{
+  height:78px;
+  padding:0 clamp(20px,5vw,76px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:rgba(245,244,239,.92);
+  border-bottom:1px solid rgba(35,39,31,.08);
+  position:sticky;
+  top:0;
+  z-index:10;
+  backdrop-filter:blur(15px);
+}
+.brand{display:flex;align-items:center;gap:10px;border:0;background:none;color:var(--ink);padding:0}
+.brand-mark{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  background:var(--lime);
+  border-radius:10px;
+  font-weight:950;
+  font-size:19px;
+  transform:rotate(-5deg);
+}
+.brand-name{font-weight:900;font-size:20px}
+.brand-name span{font-weight:500;color:#7a7f74}
+.nav{display:flex;align-items:center;gap:7px}
+.nav button{
+  border:0;
+  background:transparent;
+  color:#676b63;
+  padding:11px 16px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:750;
+}
+.nav button:hover,.nav button.active{background:#e9ebdf;color:var(--ink)}
+.top-actions{display:flex;align-items:center;gap:10px}
+.demo-badge,.status-pill{
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  border:1px solid #dfe5ca;
+  background:#f0f7d9;
+  color:#66713e;
+  border-radius:999px;
+  padding:8px 11px;
+  white-space:nowrap;
+}
+.status-pill{display:inline-flex;align-items:center;gap:7px}
+.status-pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.status-pill.draft{background:#fff6df;border-color:#f2dcae;color:#94651c}
+.avatar{
+  height:36px;
+  width:36px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#21251f;
+  color:var(--lime);
+  font-weight:800;
+  font-size:12px;
+}
+.content{max-width:1320px;margin:auto;padding:38px clamp(20px,5vw,76px) 80px}
+.eyebrow{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  font-weight:850;
+  font-size:10px;
+  color:#73796b;
+}
+.eyebrow:before{content:"";width:18px;height:2px;background:var(--acid)}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(40px,5vw,68px);line-height:1.01;margin:13px 0 15px;font-weight:900}
+h2{line-height:1.08;font-size:clamp(28px,3vw,40px);margin-bottom:10px}
+h3{font-size:17px}
+.subhead{color:var(--muted);font-size:15px;line-height:1.6;max-width:610px}
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(360px,.92fr);
+  gap:28px;
+  align-items:stretch;
+  margin:30px 0 46px;
+}
+.hero-copy{padding:12px 0}
+.hero-copy h1 span{color:#a5c934}
+.hero-meta{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:23px 0 27px;
+  color:#5f655b;
+  font-size:13px;
+  font-weight:650;
+}
+.dot{height:5px;width:5px;border-radius:50%;background:#a4c936;display:inline-block;margin-right:7px}
+.btn{
+  border:0;
+  border-radius:12px;
+  background:var(--ink);
+  color:white;
+  padding:14px 18px;
+  font-weight:800;
+  font-size:13px;
+  transition:transform .15s,background .15s,border-color .15s;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  text-decoration:none;
+}
+.btn:hover{transform:translateY(-2px);background:#2c3228}
+.btn-lime{background:var(--lime);color:var(--ink)}
+.btn-lime:hover{background:#c5ee3f}
+.btn-light{background:#f1f2ea;color:var(--ink)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn-small{padding:10px 13px;border-radius:10px;font-size:12px}
+.concert-finder{
+  background:var(--ink);
+  color:var(--card);
+  border-top:4px solid var(--lime);
+  padding:34px 38px 28px;
+  margin:0 0 32px;
+}
+.concert-finder .eyebrow{color:#c8d1bd}
+.concert-finder h1{font-size:56px;line-height:1.05;margin:14px 0 16px;overflow-wrap:break-word}
+.concert-finder h1 span{color:var(--lime)}
+.finder-intro{font-size:16px;line-height:1.5;color:#e0e6d7;margin:0 0 24px}
+.finder-actions{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.finder-button{min-height:56px;padding:16px 24px;font-size:15px}
+.finder-button:focus-visible{outline:2px solid var(--card);outline-offset:4px}
+.finder-button span{font-size:21px;line-height:1}
+.finder-budget-note{max-width:330px;margin:0;color:#c8d1bd;font-size:12px;line-height:1.5}
+.finder-meta{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:26px;padding-top:18px;border-top:1px solid #3b4136;color:#c8d1bd;font-size:11px;font-weight:650}
+.source-card{
+  background:#1b2018;
+  color:#f8f9ef;
+  border-radius:22px;
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:342px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.source-card:before{
+  content:"";
+  position:absolute;
+  width:360px;
+  height:360px;
+  border-radius:50%;
+  right:-130px;
+  top:-100px;
+  border:1px solid rgba(216,255,84,.22);
+  box-shadow:0 0 0 34px rgba(216,255,84,.05),0 0 0 72px rgba(114,214,189,.04);
+}
+.source-card:after{
+  content:"";
+  position:absolute;
+  inset:auto -30px -80px auto;
+  width:320px;
+  height:170px;
+  background:linear-gradient(135deg,rgba(216,255,84,.55),rgba(114,214,189,.32));
+  transform:rotate(-18deg);
+  filter:blur(2px);
+}
+.source-card > *{position:relative;z-index:1}
+.source-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px}
+.source-metric{
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:13px;
+  background:rgba(255,255,255,.05);
+}
+.source-metric small{display:block;color:#c8d1bd;font-size:10px;font-weight:750;margin-bottom:7px}
+.source-metric strong{font-size:20px}
+.notice{
+  border:1px solid #e2d6b8;
+  background:#fff8e8;
+  color:#745d2e;
+  border-radius:14px;
+  padding:13px 14px;
+  font-size:12px;
+  line-height:1.45;
+}
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  margin-bottom:20px;
+  gap:20px;
+}
+.section-head p{margin:0;color:var(--muted);font-size:13px}
+.filter-row{display:flex;gap:9px;align-items:center;margin:0 0 24px;flex-wrap:wrap}
+.filter-pill{
+  border:1px solid var(--line);
+  background:transparent;
+  color:#5f655b;
+  border-radius:999px;
+  padding:10px 15px;
+  font-size:12px;
+  font-weight:750;
+}
+.filter-pill.active,.filter-pill:hover{background:var(--ink);border-color:var(--ink);color:white}
+.search-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--card);
+  border:1px solid var(--line);
+  padding:0 14px;
+  height:43px;
+  border-radius:999px;
+  margin-left:auto;
+  min-width:260px;
+}
+.search-box input{border:0;outline:0;background:transparent;width:100%;font-size:12px}
+.event-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}
+.event-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:10px;
+  transition:transform .2s,box-shadow .2s;
+  cursor:pointer;
+}
+.event-card:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+.event-poster{
+  min-height:205px;
+  aspect-ratio:1;
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+  padding:17px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  color:white;
+  background:
+    radial-gradient(circle at 76% 31%,rgba(216,255,84,.95) 0 5%,transparent 5.5%),
+    radial-gradient(circle at 76% 31%,transparent 0 22%,rgba(216,255,84,.28) 22.5% 23%,transparent 23.5% 42%),
+    linear-gradient(135deg,#1e2b25,#305948 56%,#7387ff);
+}
+.event-poster.teal{background:radial-gradient(circle at 74% 33%,#d8ff54 0 6%,transparent 6.5%),radial-gradient(circle at 74% 33%,transparent 0 24%,rgba(216,255,84,.28) 24.5% 25%,transparent 25.5%),linear-gradient(135deg,#173f3e,#1c8b7f 65%,#81bf84)}
+.event-poster.blue{background:radial-gradient(circle at 72% 38%,#dbe7ff 0 5%,transparent 5.5%),repeating-linear-gradient(135deg,transparent 0 17px,rgba(209,233,255,.13) 17px 18px),linear-gradient(135deg,#192846,#426c9b 55%,#a9bccb)}
+.event-poster.red{background:radial-gradient(circle at 72% 39%,#ffd284 0 7%,transparent 7.5%),radial-gradient(circle at 72% 39%,transparent 0 25%,rgba(255,228,174,.37) 25.5% 26%,transparent 26.5%),linear-gradient(145deg,#3d1f1c,#c45742 62%,#e99552)}
+.event-poster.purple{background:radial-gradient(circle at 70% 32%,#ffab7a 0 10%,transparent 10.5%),radial-gradient(circle at 70% 32%,transparent 0 23%,rgba(255,208,163,.55) 23.5% 24%,transparent 24.5% 43%),linear-gradient(145deg,#302143,#8855a8 58%,#ef8e7a)}
+.event-poster:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.38))}
+.poster-label,.poster-title,.poster-note{position:relative;z-index:1}
+.poster-label{font-size:9px;text-transform:uppercase;letter-spacing:.13em;font-weight:900;display:flex;justify-content:space-between;gap:10px}
+.poster-title{font-weight:950;font-size:28px;line-height:.95;max-width:205px;text-transform:uppercase}
+.poster-note{font-size:10px;color:#eef2e8;line-height:1.35}
+.poster-image{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--ink);z-index:2;opacity:0}
+.event-poster.image-loaded .poster-image{opacity:1}
+.event-poster.image-loaded .poster-label,.event-poster.image-loaded .poster-title,.event-poster.image-loaded .poster-note{visibility:hidden}
+.event-info{padding:15px 9px 8px}
+.event-info h3{margin:0 0 7px;font-size:17px}
+.event-info p{font-size:12px;color:var(--muted);margin:0;line-height:1.45}
+.event-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:10px}
+.price-note{font-size:11px;font-weight:850;color:#785e2e}
+.round-arrow{width:34px;height:34px;border-radius:50%;background:var(--lime);border:0;font-size:18px;font-weight:800}
+.page-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;gap:12px}
+.back-btn{background:none;border:0;color:#67705c;font-weight:750;font-size:13px;padding:8px 0}
+.detail-layout{display:grid;grid-template-columns:1.02fr .98fr;gap:28px;align-items:start}
+.detail-panel,.panel{
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:18px;
+  padding:22px;
+}
+.detail-poster{min-height:390px;border-radius:18px}
+.event-meta{display:flex;gap:13px;flex-wrap:wrap;margin:18px 0;color:#62675e;font-size:12px;font-weight:650}
+.meta-chip{border:1px solid var(--line);background:#f4f5ec;border-radius:999px;padding:9px 11px}
+.divider{height:1px;background:var(--line);margin:19px 0}
+.review-list{display:grid;gap:9px;margin:14px 0 0;padding:0;list-style:none}
+.review-list li{
+  display:flex;
+  gap:9px;
+  color:#62675e;
+  font-size:12px;
+  line-height:1.45;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 11px;
+  background:#f7f7f0;
+}
+.review-list li:before{content:"!";font-weight:900;color:#9a6a25}
+.chat-shell{
+  display:grid;
+  grid-template-columns:minmax(0,.92fr) minmax(360px,1.08fr);
+  gap:20px;
+  align-items:start;
+}
+.chat-panel{
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:18px;
+  min-height:560px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.chat-log{
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  flex:1;
+  overflow:auto;
+}
+.msg{max-width:88%;border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.5}
+.msg.assistant{background:#eef1e6;color:#343a2d;align-self:flex-start}
+.msg.user{background:#1d2119;color:white;align-self:flex-end}
+.chat-form{border-top:1px solid var(--line);padding:14px;display:grid;grid-template-columns:1fr auto;gap:10px}
+.chat-form input{
+  min-width:0;
+  height:44px;
+  border:1px solid #dfe0d7;
+  border-radius:12px;
+  padding:0 13px;
+  outline:none;
+  background:#fffefa;
+  font-size:13px;
+}
+.chat-form input:focus,.field input:focus,.field select:focus{border-color:#a8c834;box-shadow:0 0 0 3px rgba(198,237,61,.15)}
+.controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.field{display:grid;gap:7px}
+.field label{font-size:11px;font-weight:850;color:#4f554c}
+.field input,.field select{
+  height:43px;
+  border:1px solid #dfe0d7;
+  border-radius:11px;
+  padding:0 12px;
+  outline:none;
+  background:#fffefa;
+  font-size:12px;
+}
+.recommendation-list{display:grid;gap:12px;margin-top:17px}
+.rec-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fffefa;
+  padding:14px;
+}
+.rec-card h3{margin:0 0 6px}
+.rec-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+.admin-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(330px,.95fr);gap:19px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:17px}
+.stat{border:1px solid var(--line);background:#fffefa;border-radius:16px;padding:16px}
+.stat small{font-size:10px;color:var(--muted);font-weight:750}
+.stat strong{display:block;font-size:26px;margin-top:7px}
+.audit-list{display:grid;gap:10px;margin-top:14px}
+.audit-row{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:11px;
+  align-items:start;
+  border:1px solid var(--line);
+  background:#fffefa;
+  border-radius:14px;
+  padding:13px;
+}
+.audit-icon{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:#eef1e6;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  color:#5f6d39;
+}
+.audit-row strong{display:block;font-size:13px;margin-bottom:4px}
+.audit-row p{font-size:12px;color:var(--muted);line-height:1.45;margin:0}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fffefa}
+.catalog-table{width:100%;border-collapse:collapse;font-size:12px;min-width:720px}
+.catalog-table th{
+  text-align:left;
+  color:#878c80;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  padding:12px 11px;
+  border-bottom:1px solid var(--line);
+}
+.catalog-table td{padding:12px 11px;border-bottom:1px solid #eff0e9;vertical-align:top}
+.catalog-table tr:last-child td{border-bottom:0}
+.source-link{font-size:11px;color:#486c9d;text-decoration:none;font-weight:750}
+.source-link:hover{text-decoration:underline}
+.empty-state{text-align:center;padding:70px 20px;color:var(--muted)}
+.empty-state strong{display:block;color:var(--ink);font-size:19px;margin-bottom:8px}
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translate(-50%,20px);
+  opacity:0;
+  pointer-events:none;
+  background:#1c211a;
+  color:white;
+  border-radius:999px;
+  padding:13px 19px;
+  font-size:12px;
+  font-weight:750;
+  box-shadow:var(--shadow);
+  transition:.25s;
+  z-index:30;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.footer{
+  border-top:1px solid var(--line);
+  padding:23px clamp(20px,5vw,76px);
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  color:#858a7d;
+  font-size:10px;
+}
+@media(max-width:980px){
+  .hero,.detail-layout,.chat-shell,.admin-grid{grid-template-columns:1fr}
+  .source-card{min-height:300px}
+  .event-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:660px){
+  .topbar{height:auto;min-height:66px;padding:12px 17px;gap:10px;align-items:flex-start}
+  .brand-name{font-size:17px}
+  .top-actions{display:none}
+  .nav{gap:0;flex-wrap:wrap;justify-content:flex-end}
+  .nav button{padding:9px 9px;font-size:11px}
+  .content{padding:25px 17px 55px}
+  .concert-finder{padding:24px 22px;margin-bottom:28px}
+  .concert-finder h1{font-size:36px}
+  .finder-intro{font-size:15px;margin-bottom:20px}
+  .finder-actions{align-items:stretch;gap:12px}
+  .finder-button{width:100%}
+  .finder-meta{margin-top:22px;gap:8px 16px}
+  .hero{margin:18px 0 36px}
+  .source-grid,.controls-grid,.stat-grid{grid-template-columns:1fr}
+  .section-head{align-items:start}
+  .section-head p{text-align:right;font-size:11px}
+  .search-box{width:100%;order:2;margin:4px 0 0;min-width:0}
+  .event-grid{grid-template-columns:1fr}
+  .event-poster{min-height:184px}
+  .detail-poster{min-height:300px}
+  .chat-form{grid-template-columns:1fr}
+  .msg{max-width:96%}
+  .footer{padding:18px;flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <button class="brand" data-view="discover" aria-label="Početna stranica">
+    <span class="brand-mark">h</span>
+    <span class="brand-name">hype<span>tickets</span></span>
+  </button>
+  <nav class="nav" aria-label="Glavna navigacija">
+    <button class="active" data-view="discover">Katalog</button>
+    <button data-view="chat">AI vodič</button>
+    <button data-view="admin">Revizija</button>
+  </nav>
+  <div class="top-actions">
+    <span class="demo-badge">Vizuelni demo bez prodaje</span>
+    <span class="avatar">HS</span>
+  </div>
+</header>
+<main class="content" id="main"></main>
+<footer class="footer">
+  <span>HYPE TICKETS · DRAFT KATALOG</span>
+  <span>Ovo je vizuelni demo. Nema checkout-a, rezervacija, plaćanja ni stvarne prodaje ulaznica.</span>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script type="application/json" id="event-catalog">
+{
+  "sourceAudit": {
+    "checkedAt": "2026-10-12",
+    "pageUrl": "https://www.hypeproduction.rs/koncerti/",
+    "restPageUrl": "https://www.hypeproduction.rs/wp-json/wp/v2/pages/2199",
+    "findings": [
+      {
+        "label": "WordPress REST root",
+        "status": "available",
+        "detail": "The site advertises https://www.hypeproduction.rs/wp-json/ and exposes the Koncerti page as a page JSON record."
+      },
+      {
+        "label": "Dedicated event API",
+        "status": "not_usable",
+        "detail": "No public wp/v2/portfolio collection route was available during inspection; the event list is embedded rendered page HTML, not normalized event data."
+      },
+      {
+        "label": "RSS feed",
+        "status": "not_usable",
+        "detail": "The public feed exists but contained no item records at inspection time, so it is not useful for event import."
+      },
+      {
+        "label": "Image reuse",
+        "status": "needs_permission",
+        "detail": "Image URLs are recorded from the source page, but reuse permission was not published on the page. This visual demo assumes reuse approval; event records remain unverified."
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": "boris-novkovic-arena-zagreb-2027-05-29",
+      "artist": "Boris Novković",
+      "eventTitle": "BORIS NOVKOVIĆ - ARENA ZAGREB - 29.05.2027.",
+      "city": "Zagreb",
+      "venue": "Arena Zagreb",
+      "date": "2027-05-29",
+      "sourceDateText": "29.05.2027.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/10/1080x1080-Boris-Novkovic-Arena-Zagreb.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/boris-novkovic-arena-zagreb-29-05-2027/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "vesna-zmijanac-ljubljana-2027-02-20",
+      "artist": "Vesna Zmijanac",
+      "eventTitle": "VESNA ZMIJANAC - LJUBLJANA - 20.02.2027.",
+      "city": "Ljubljana",
+      "venue": null,
+      "date": "2027-02-20",
+      "sourceDateText": "20.02.2027.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/10/VESNA-LJUBLJANA-20.02.2027.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/vesna-zmijanac-ljubljana-20-02-2027/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "Venue is not stated in the visible source title.",
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "aca-lukas-arena-zagreb-2027-02-13",
+      "artist": "Aca Lukas",
+      "eventTitle": "ACA LUKAS - ARENA ZAGREB - 13.02.2027.",
+      "city": "Zagreb",
+      "venue": "Arena Zagreb",
+      "date": "2027-02-13",
+      "sourceDateText": "13.02.2027.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/10/1080x1080-Aca-Lukas-ARENA-ZAGREB-2027.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/aca-lukas-arena-zagreb-13-02-2027/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "miroslav-ilic-arena-zagreb-2027-01-23",
+      "artist": "Miroslav Ilić",
+      "eventTitle": "MIROSLAV ILIĆ - ARENA ZAGREB - 23.01.2027.",
+      "city": "Zagreb",
+      "venue": "Arena Zagreb",
+      "date": "2027-01-23",
+      "sourceDateText": "23.01.2027.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/10/1080x1080-Miroslav-Ilic-Arena-Zagreb.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/miroslav-ilic-arena-zagreb-23-01-2027/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "vesna-zmijanac-sarajevo-2026-12-19",
+      "artist": "Vesna Zmijanac",
+      "eventTitle": "VESNA ZMIJANAC - SARAJEVO - 19.12.2026",
+      "city": "Sarajevo",
+      "venue": null,
+      "date": "2026-12-19",
+      "sourceDateText": "19.12.2026",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/05/VESNA-SARAJEVO-19.12.2026.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/vesna-zmijanac-sarajevo-19-12-2026/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "Venue is not stated in the visible source title.",
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "miroslav-ilic-beogradska-arena-2026-12-10",
+      "artist": "Miroslav Ilić",
+      "eventTitle": "MIROSLAV ILIĆ - BEOGRADSKA ARENA - 10.12.2026.",
+      "city": "Beograd",
+      "venue": "Beogradska arena",
+      "date": "2026-12-10",
+      "sourceDateText": "10.12.2026.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2025/12/Miroslav-Ilic-koncert-2026.jpeg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/miroslav-ilic-beogradska-arena-10-12-2026/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "City is inferred from the venue text and should be verified by an admin.",
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "vesna-zmijanac-skopje-2026-11-28",
+      "artist": "Vesna Zmijanac",
+      "eventTitle": "VESNA ZMIJANAC - SKOPJE - 28.11.2026.",
+      "city": "Skopje",
+      "venue": null,
+      "date": "2026-11-28",
+      "sourceDateText": "28.11.2026.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/10/VESNA-SKOPLJE-28.11.2026.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/vesna-zmijanac-skopje-28-11-2026/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "Venue is not stated in the visible source title.",
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "mira-skoric-sava-centar-2026-11-19",
+      "artist": "Mira Škorić",
+      "eventTitle": "MIRA ŠKORIĆ - SAVA CENTAR - 19.11.2026.",
+      "city": "Beograd",
+      "venue": "Sava Centar",
+      "date": "2026-11-19",
+      "sourceDateText": "19.11.2026.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/01/Mira-Skoric-plakat-1.jpeg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/mira-skoric-sava-centar-19112026/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "City is inferred from the venue text and should be verified by an admin.",
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "aca-lukas-beogradska-arena-2026-11-04",
+      "artist": "Aca Lukas",
+      "eventTitle": "ACA LUKAS - BEOGRADSKA ARENA - 04.11.2026.",
+      "city": "Beograd",
+      "venue": "Beogradska arena",
+      "date": "2026-11-04",
+      "sourceDateText": "04.11.2026.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2025/12/1080x1080-Lukas-copy-1.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/aca-lukas-beogradska-arena-04-11-2026/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "City is inferred from the venue text and should be verified by an admin.",
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    },
+    {
+      "id": "aca-lukas-beogradska-arena-2026-11-03",
+      "artist": "Aca Lukas",
+      "eventTitle": "ACA LUKAS - BEOGRADSKA ARENA - 03.11.2026.",
+      "city": "Beograd",
+      "venue": "Beogradska arena",
+      "date": "2026-11-03",
+      "sourceDateText": "03.11.2026.",
+      "imageUrl": "https://www.hypeproduction.rs/wp-content/uploads/2026/08/1080x1080-Aca-Lukas-2-03.11.jpg",
+      "imageAccessible": true,
+      "imageReuseApproved": false,
+      "sourceUrl": "https://www.hypeproduction.rs/portfolio/aca-lukas-beogradska-arena-03-11-2026/",
+      "importedAt": "2026-10-12",
+      "status": "draft",
+      "verificationStatus": "unverified",
+      "price": null,
+      "priceVerified": false,
+      "ticketZonesVerified": false,
+      "capacityVerified": false,
+      "availabilityVerified": false,
+      "reviewFlags": [
+        "City is inferred from the venue text and should be verified by an admin.",
+        "Price, zones, capacity and ticket availability are not published on the source page.",
+        "Image reuse permission is not published; use fallback visual until approved."
+      ]
+    }
+  ]
+}
+</script>
+<script>
+const catalogData=JSON.parse(document.getElementById("event-catalog").textContent);
+const events=catalogData.events.sort((a,b)=>new Date(a.date)-new Date(b.date));
+const sourceAudit=catalogData.sourceAudit;
+const main=document.getElementById("main");
+let state={
+  view:"discover",
+  selectedEvent:events[0],
+  filter:"Svi gradovi",
+  query:"",
+  chatCriteria:{city:"Beograd",minPrice:"",maxPrice:"3000"},
+  messages:[
+    {role:"assistant",text:"Zdravo. Mogu da preporučim draft događaje iz lokalnog kataloga po gradu i budžetu. Cene nisu verifikovane, pa neću tvrditi da događaj ulazi u budžet dok admin ne potvrdi cenu."}
+  ]
+};
+const posterClasses=["teal","blue","red","purple"];
+const cities=["Svi gradovi",...Array.from(new Set(events.map(e=>e.city))).sort((a,b)=>a.localeCompare(b,"sr-Latn"))];
+
+function esc(value){
+  return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function formatDate(date){
+  return new Intl.DateTimeFormat("sr-Latn-RS",{day:"2-digit",month:"long",year:"numeric"}).format(new Date(date+"T12:00:00"));
+}
+function initials(name){
+  return name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("");
+}
+function shortDate(date){
+  return new Intl.DateTimeFormat("sr-Latn-RS",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(date+"T12:00:00"));
+}
+function money(value){
+  return new Intl.NumberFormat("sr-RS").format(value)+" RSD";
+}
+function cityFilter(event){
+  return state.filter==="Svi gradovi"||event.city===state.filter;
+}
+function searchFilter(event){
+  const haystack=[event.artist,event.eventTitle,event.city,event.venue].join(" ").toLowerCase();
+  return haystack.includes(state.query.toLowerCase());
+}
+function filteredEvents(){
+  return events.filter(e=>cityFilter(e)&&searchFilter(e));
+}
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+}
+function setView(view){
+  state.view=view;
+  window.scrollTo(0,0);
+  render();
+}
+function eventStatus(event){
+  return event.status==="draft"?"Draft · neprovereno":"Potrebna revizija";
+}
+function hash(input){
+  let value=0;
+  for(let i=0;i<input.length;i+=1)value=((value<<5)-value)+input.charCodeAt(i);
+  return value;
+}
+function poster(event,large=false){
+  const klass=posterClasses[Math.abs(hash(event.id))%posterClasses.length];
+  // Reuse approval is assumed for this visual demo; catalog verification is unchanged.
+  const imageUrl=typeof event.imageUrl==="string"?event.imageUrl.trim():"";
+  return `<div class="event-poster ${klass} ${large?"detail-poster":""}">
+    ${imageUrl?`<img class="poster-image" src="${esc(imageUrl)}" alt="Poster za ${esc(event.eventTitle)}" loading="lazy" decoding="async" onload="this.parentElement.classList.add('image-loaded')" onerror="this.parentElement.classList.remove('image-loaded');this.remove()">`:""}
+    <div class="poster-label"><span>${esc(event.city)}</span><span>${esc(event.sourceDateText)}</span></div>
+    <div class="poster-title">${esc(initials(event.artist))}</div>
+    <div class="poster-note">Rezervni poster<br>${esc(event.venue||"Venue nije naveden")}</div>
+  </div>`;
+}
+function discover(){
+  const list=filteredEvents();
+  return `<section class="concert-finder" aria-labelledby="finder-title">
+    <div class="eyebrow">Hype Tickets / AI vodič</div>
+    <h1 id="finder-title"><span>AI</span> CONCERT FINDER</h1>
+    <p class="finder-intro">Pronađite preporuke koncerata prema vašem gradu i budžetu.</p>
+    <div class="finder-actions">
+      <button class="btn btn-lime finder-button" onclick="setView('chat')">Pronađi koncert <span aria-hidden="true">&#8594;</span></button>
+      <p class="finder-budget-note">Cene nisu verifikovane. Uklapanje u budžet zahteva admin proveru.</p>
+    </div>
+    <div class="finder-meta">
+      <span>${events.length} draft događaja</span>
+      <span>Import: ${esc(sourceAudit.checkedAt)}</span>
+      <span>Vizuelni demo bez prodaje</span>
+    </div>
+  </section>
+  <section id="events">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Katalog događaja</div>
+        <h2>Import za admin proveru</h2>
+      </div>
+      <p>${list.length} od ${events.length} događaja</p>
+    </div>
+    <div class="notice" style="margin-bottom:18px">Nijedan događaj nema verifikovanu cenu, zonu, kapacitet ili dostupnost ulaznica. Kartice služe za izbor kandidata za ručnu proveru, ne za kupovinu.</div>
+    <div class="filter-row">
+      ${cities.map(city=>`<button class="filter-pill ${state.filter===city?"active":""}" onclick="setFilter('${esc(city)}')">${esc(city)}</button>`).join("")}
+      <label class="search-box"><span>Search</span><input aria-label="Pretraži događaje" placeholder="Artist, grad ili venue" value="${esc(state.query)}" oninput="setQuery(this.value)"></label>
+    </div>
+    <div class="event-grid">${list.map(eventCard).join("")||`<div class="empty-state"><strong>Nema rezultata</strong>Probajte drugi grad ili naziv događaja.</div>`}</div>
+  </section>`;
+}
+function eventCard(event){
+  return `<article class="event-card" tabindex="0" role="button" aria-label="Detalji: ${esc(event.artist)}" onclick="openEvent('${esc(event.id)}')" onkeydown="if(event.key==='Enter')openEvent('${esc(event.id)}')">
+    ${poster(event)}
+    <div class="event-info">
+      <span class="status-pill draft">${esc(eventStatus(event))}</span>
+      <h3 style="margin-top:12px">${esc(event.artist)}</h3>
+      <p>${esc(formatDate(event.date))} · ${esc(event.city)} · ${esc(event.venue||"venue za proveru")}</p>
+      <div class="event-bottom">
+        <span class="price-note">Cena nije verifikovana</span>
+        <button class="round-arrow" aria-label="Otvori detalje" onclick="event.stopPropagation();openEvent('${esc(event.id)}')">-></button>
+      </div>
+    </div>
+  </article>`;
+}
+function setFilter(value){
+  state.filter=value;
+  render();
+}
+function setQuery(value){
+  state.query=value;
+  const pos=window.scrollY;
+  render();
+  document.querySelector(".search-box input")?.focus();
+  window.scrollTo(0,pos);
+}
+function openEvent(id){
+  state.selectedEvent=events.find(e=>e.id===id)||events[0];
+  setView("event");
+}
+function eventPage(){
+  const event=state.selectedEvent||events[0];
+  return `<div class="page-top">
+    <button class="back-btn" onclick="setView('discover')"><- Nazad na katalog</button>
+    <span class="demo-badge">Draft događaj · bez prodaje</span>
+  </div>
+  <div class="detail-layout">
+    <section>
+      ${poster(event,true)}
+      <div class="detail-panel" style="margin-top:16px">
+        <div class="eyebrow">Izvorni zapis</div>
+        <h2 style="margin-top:12px">${esc(event.artist)}</h2>
+        <p class="subhead">${esc(event.eventTitle)}</p>
+        <div class="event-meta">
+          <span class="meta-chip">${esc(formatDate(event.date))}</span>
+          <span class="meta-chip">${esc(event.city)}</span>
+          <span class="meta-chip">${esc(event.venue||"Venue nije naveden")}</span>
+        </div>
+        <div class="notice">Cena nije verifikovana. Ovaj događaj ne može biti preporučen kao događaj koji se uklapa u budžet dok admin ne potvrdi cenu iz pouzdanog izvora.</div>
+      </div>
+    </section>
+    <aside class="detail-panel">
+      <div class="eyebrow">Admin status</div>
+      <h2 style="margin-top:12px">Potrebna ručna provera</h2>
+      <p class="subhead" style="font-size:12px">Katalog čuva proverljive podatke sa izvora, ali ne popunjava komercijalne detalje koji nisu objavljeni.</p>
+      <div class="divider"></div>
+      <div class="audit-list">
+        <div class="audit-row"><span class="audit-icon">P</span><div><strong>Cena</strong><p>Nema verifikovane cene; ne koristi se za budžetski match.</p></div></div>
+        <div class="audit-row"><span class="audit-icon">Z</span><div><strong>Zone i kapacitet</strong><p>Nisu importovani jer nisu objavljeni na izvornoj stranici.</p></div></div>
+        <div class="audit-row"><span class="audit-icon">I</span><div><strong>Slika</strong><p>Za vizuelni demo pretpostavljeno je odobrenje za reuse. Rezervni poster se prikazuje kada URL nedostaje ili slika ne može da se učita.</p></div></div>
+      </div>
+      <ul class="review-list">
+        ${event.reviewFlags.map(flag=>`<li>${esc(flag)}</li>`).join("")}
+      </ul>
+      <div class="divider"></div>
+      <p style="font-size:11px;color:var(--muted);line-height:1.6;word-break:break-word">Image URL: ${esc(event.imageUrl)}</p>
+      <a class="btn btn-ghost btn-small" href="${esc(event.sourceUrl)}" target="_blank" rel="noreferrer">Otvori izvor</a>
+      <button class="btn btn-lime btn-small" style="margin-left:8px" onclick="toast('Demo: događaj je označen za admin proveru.')">Označi za proveru</button>
+    </aside>
+  </div>`;
+}
+function chatView(){
+  const recs=recommendEvents();
+  return `<div class="page-top">
+    <div>
+      <div class="eyebrow">AI chat · demo logika</div>
+      <h2 style="margin-top:12px">Preporuke iz draft kataloga</h2>
+    </div>
+    <span class="demo-badge">Nema lažnih cena</span>
+  </div>
+  <div class="chat-shell">
+    <aside class="panel">
+      <div class="eyebrow">Filteri</div>
+      <h2 style="margin-top:12px">Grad i budžet</h2>
+      <p class="subhead" style="font-size:12px">Unesite grad i raspon cene. Ako cena nije verifikovana, AI to eksplicitno kaže i ne tvrdi da događaj odgovara budžetu.</p>
+      <div class="controls-grid">
+        <div class="field">
+          <label for="city">Grad</label>
+          <select id="city" onchange="setChatCriteria('city',this.value)">${cities.filter(c=>c!=="Svi gradovi").map(city=>`<option ${state.chatCriteria.city===city?"selected":""}>${esc(city)}</option>`).join("")}</select>
+        </div>
+        <div class="field">
+          <label for="minPrice">Min cena RSD</label>
+          <input id="minPrice" inputmode="numeric" value="${esc(state.chatCriteria.minPrice)}" placeholder="npr. 1000" oninput="setChatCriteria('minPrice',this.value)">
+        </div>
+        <div class="field">
+          <label for="maxPrice">Max cena RSD</label>
+          <input id="maxPrice" inputmode="numeric" value="${esc(state.chatCriteria.maxPrice)}" placeholder="npr. 3000" oninput="setChatCriteria('maxPrice',this.value)">
+        </div>
+      </div>
+      <button class="btn btn-lime" style="margin-top:14px" onclick="askWithControls()">Preporuči događaje</button>
+      <div class="recommendation-list">${recs.map(recommendationCard).join("")||`<div class="empty-state" style="padding:32px 12px"><strong>Nema podudaranja za grad</strong>Promenite grad ili pretragu.</div>`}</div>
+    </aside>
+    <section class="chat-panel" aria-label="AI chat">
+      <div class="chat-log">${state.messages.map(message=>`<div class="msg ${message.role}">${esc(message.text)}</div>`).join("")}</div>
+      <form class="chat-form" onsubmit="submitChat(event)">
+        <input id="chatInput" aria-label="Poruka AI vodiču" placeholder="Npr. Beograd do 3000 RSD">
+        <button class="btn btn-lime" type="submit">Pošalji</button>
+      </form>
+    </section>
+  </div>`;
+}
+function setChatCriteria(key,value){
+  state.chatCriteria[key]=value;
+}
+function numeric(value){
+  const parsed=parseInt(String(value).replace(/[^\d]/g,""),10);
+  return Number.isFinite(parsed)?parsed:null;
+}
+function recommendEvents(){
+  return events.filter(event=>event.city===state.chatCriteria.city);
+}
+function budgetText(){
+  const min=numeric(state.chatCriteria.minPrice);
+  const max=numeric(state.chatCriteria.maxPrice);
+  if(min&&max) return `${money(min)}-${money(max)}`;
+  if(max) return `do ${money(max)}`;
+  if(min) return `od ${money(min)}`;
+  return "bez zadatog budžeta";
+}
+function recommendationText(){
+  const matches=recommendEvents();
+  const budget=budgetText();
+  if(!matches.length) return `Ne nalazim draft događaje za ${state.chatCriteria.city} u lokalnom katalogu.`;
+  const names=matches.slice(0,4).map(e=>`${e.artist} (${shortDate(e.date)})`).join(", ");
+  return `Za ${state.chatCriteria.city} nalazim ${matches.length} draft događaja: ${names}. Budžet je ${budget}, ali nijedan od ovih događaja nema verifikovanu cenu, pa ne mogu da tvrdim da se uklapa u taj raspon. Preporuka za demo: prikaži ih kao kandidate i traži admin proveru cene pre bilo kakve prodaje.`;
+}
+function recommendationCard(event){
+  return `<article class="rec-card">
+    <span class="status-pill draft">Cena nije verifikovana</span>
+    <h3 style="margin-top:10px">${esc(event.artist)}</h3>
+    <p>${esc(formatDate(event.date))} · ${esc(event.city)} · ${esc(event.venue||"venue za proveru")}</p>
+    <button class="btn btn-small btn-light" style="margin-top:11px" onclick="openEvent('${esc(event.id)}')">Detalji drafta</button>
+  </article>`;
+}
+function askWithControls(){
+  state.messages.push({role:"user",text:`Preporuči događaje za ${state.chatCriteria.city}, budžet ${budgetText()}.`});
+  state.messages.push({role:"assistant",text:recommendationText()});
+  render();
+}
+function submitChat(event){
+  event.preventDefault();
+  const input=document.getElementById("chatInput");
+  const text=input.value.trim();
+  if(!text) return;
+  parseChatCriteria(text);
+  state.messages.push({role:"user",text});
+  state.messages.push({role:"assistant",text:recommendationText()});
+  render();
+}
+function parseChatCriteria(text){
+  const lower=text.toLowerCase();
+  const city=cities.find(candidate=>candidate!=="Svi gradovi"&&lower.includes(candidate.toLowerCase()));
+  if(city) state.chatCriteria.city=city;
+  const numbers=text.match(/\d[\d.\s]*/g)?.map(n=>numeric(n)).filter(Boolean)||[];
+  if(numbers.length>=2){
+    state.chatCriteria.minPrice=String(Math.min(...numbers));
+    state.chatCriteria.maxPrice=String(Math.max(...numbers));
+  }else if(numbers.length===1){
+    state.chatCriteria.minPrice="";
+    state.chatCriteria.maxPrice=String(numbers[0]);
+  }
+}
+function adminView(){
+  const missingVenue=events.filter(e=>!e.venue).length;
+  const inferred=events.filter(e=>e.reviewFlags.some(flag=>flag.includes("inferred"))).length;
+  return `<div class="page-top">
+    <div>
+      <div class="eyebrow">Admin revizija</div>
+      <h2 style="margin-top:12px">Source audit i draft katalog</h2>
+    </div>
+    <span class="demo-badge">Import ${esc(sourceAudit.checkedAt)}</span>
+  </div>
+  <div class="stat-grid">
+    <div class="stat"><small>Draft događaji</small><strong>${events.length}</strong></div>
+    <div class="stat"><small>Bez venue polja</small><strong>${missingVenue}</strong></div>
+    <div class="stat"><small>Grad za proveru</small><strong>${inferred}</strong></div>
+  </div>
+  <div class="admin-grid">
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h3>Catalog records</h3>
+          <p>Svi događaji su draft/unverified i ne pokreću prodaju.</p>
+        </div>
+        <button class="btn btn-small btn-light" onclick="toast('Demo: export bi sadržao isti lokalni JSON katalog.')">Export JSON</button>
+      </div>
+      <div class="table-wrap">
+        <table class="catalog-table">
+          <thead><tr><th>Artist</th><th>Grad / venue</th><th>Datum</th><th>Status</th><th>Izvor</th></tr></thead>
+          <tbody>
+          ${events.map(event=>`<tr>
+            <td><strong>${esc(event.artist)}</strong><br><span style="color:var(--muted)">${esc(event.eventTitle)}</span></td>
+            <td>${esc(event.city)}<br><span style="color:var(--muted)">${esc(event.venue||"Venue za proveru")}</span></td>
+            <td>${esc(shortDate(event.date))}</td>
+            <td><span class="status-pill draft">Draft</span><br><span style="display:block;margin-top:8px;color:var(--muted);font-size:11px">Cena nije verifikovana</span></td>
+            <td><a class="source-link" href="${esc(event.sourceUrl)}" target="_blank" rel="noreferrer">Otvori</a></td>
+          </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <aside class="panel">
+      <div class="eyebrow">API / feed check</div>
+      <h2 style="margin-top:12px">Ne koristiti browser scraper</h2>
+      <p class="subhead" style="font-size:12px">Rezultat provere je sačuvan kao deo demo interfejsa, da se vidi zašto katalog ostaje ručno verifikovan snapshot.</p>
+      <div class="audit-list">
+        ${sourceAudit.findings.map(item=>`<div class="audit-row"><span class="audit-icon">${item.status==="available"?"OK":"!"}</span><div><strong>${esc(item.label)}</strong><p>${esc(item.detail)}</p></div></div>`).join("")}
+      </div>
+      <div class="divider"></div>
+      <p style="font-size:11px;color:var(--muted);line-height:1.55">Source page: <a class="source-link" href="${esc(sourceAudit.pageUrl)}" target="_blank" rel="noreferrer">${esc(sourceAudit.pageUrl)}</a></p>
+      <p style="font-size:11px;color:var(--muted);line-height:1.55">REST page record: <a class="source-link" href="${esc(sourceAudit.restPageUrl)}" target="_blank" rel="noreferrer">${esc(sourceAudit.restPageUrl)}</a></p>
+    </aside>
+  </div>`;
+}
+function render(){
+  document.querySelectorAll(".nav button").forEach(button=>{
+    const active=button.dataset.view===state.view||(state.view==="event"&&button.dataset.view==="discover");
+    button.classList.toggle("active",active);
+  });
+  main.innerHTML=state.view==="discover"?discover():state.view==="event"?eventPage():state.view==="chat"?chatView():adminView();
+  const log=document.querySelector(".chat-log");
+  if(log) log.scrollTop=log.scrollHeight;
+}
+document.querySelectorAll("[data-view]").forEach(button=>button.addEventListener("click",()=>setView(button.dataset.view)));
+render();
+</script>
+</body>
+</html>
