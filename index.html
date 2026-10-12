@@ -364,10 +364,12 @@ h3{font-size:17px}
   font-size:13px;
 }
 .chat-form input:focus,.field input:focus,.field select:focus{border-color:#a8c834;box-shadow:0 0 0 3px rgba(198,237,61,.15)}
-.controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.field{display:grid;gap:7px}
+.controls-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.field{display:grid;gap:7px;min-width:0}
 .field label{font-size:11px;font-weight:850;color:#4f554c}
 .field input,.field select{
+  width:100%;
+  min-width:0;
   height:43px;
   border:1px solid #dfe0d7;
   border-radius:11px;
@@ -813,12 +815,13 @@ let state={
   selectedEvent:events[0],
   filter:"Svi gradovi",
   query:"",
-  chatCriteria:{city:"Beograd",minPrice:"",maxPrice:"3000"},
+  chatCriteria:{city:"Beograd",minPrice:"",maxPrice:"3000",currency:"RSD"},
   messages:[
     {role:"assistant",text:"Zdravo. Mogu da preporučim draft događaje iz lokalnog kataloga po gradu i budžetu. Cene nisu verifikovane, pa neću tvrditi da događaj ulazi u budžet dok admin ne potvrdi cenu."}
   ]
 };
 const posterClasses=["teal","blue","red","purple"];
+const currencies={RSD:"Srpski dinar",EUR:"Evro",BAM:"Konvertibilna marka"};
 const cities=["Svi gradovi",...Array.from(new Set(events.map(e=>e.city))).sort((a,b)=>a.localeCompare(b,"sr-Latn"))];
 
 function esc(value){
@@ -834,7 +837,7 @@ function shortDate(date){
   return new Intl.DateTimeFormat("sr-Latn-RS",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(date+"T12:00:00"));
 }
 function money(value){
-  return new Intl.NumberFormat("sr-RS").format(value)+" RSD";
+  return new Intl.NumberFormat("sr-RS").format(value)+" "+state.chatCriteria.currency;
 }
 function cityFilter(event){
   return state.filter==="Svi gradovi"||event.city===state.filter;
@@ -999,11 +1002,15 @@ function chatView(){
           <select id="city" onchange="setChatCriteria('city',this.value)">${cities.filter(c=>c!=="Svi gradovi").map(city=>`<option ${state.chatCriteria.city===city?"selected":""}>${esc(city)}</option>`).join("")}</select>
         </div>
         <div class="field">
-          <label for="minPrice">Min cena RSD</label>
+          <label for="currency">Valuta budžeta</label>
+          <select id="currency" onchange="setChatCriteria('currency',this.value)">${Object.entries(currencies).map(([code,name])=>`<option value="${code}" ${state.chatCriteria.currency===code?"selected":""}>${code} - ${esc(name)}</option>`).join("")}</select>
+        </div>
+        <div class="field">
+          <label for="minPrice">Min cena <span data-budget-currency>${esc(state.chatCriteria.currency)}</span></label>
           <input id="minPrice" inputmode="numeric" value="${esc(state.chatCriteria.minPrice)}" placeholder="npr. 1000" oninput="setChatCriteria('minPrice',this.value)">
         </div>
         <div class="field">
-          <label for="maxPrice">Max cena RSD</label>
+          <label for="maxPrice">Max cena <span data-budget-currency>${esc(state.chatCriteria.currency)}</span></label>
           <input id="maxPrice" inputmode="numeric" value="${esc(state.chatCriteria.maxPrice)}" placeholder="npr. 3000" oninput="setChatCriteria('maxPrice',this.value)">
         </div>
       </div>
@@ -1013,7 +1020,7 @@ function chatView(){
     <section class="chat-panel" aria-label="AI chat">
       <div class="chat-log">${state.messages.map(message=>`<div class="msg ${message.role}">${esc(message.text)}</div>`).join("")}</div>
       <form class="chat-form" onsubmit="submitChat(event)">
-        <input id="chatInput" aria-label="Poruka AI vodiču" placeholder="Npr. Beograd do 3000 RSD">
+        <input id="chatInput" aria-label="Poruka AI vodiču" placeholder="Npr. Beograd do 3000 ${esc(state.chatCriteria.currency)}">
         <button class="btn btn-lime" type="submit">Pošalji</button>
       </form>
     </section>
@@ -1021,6 +1028,10 @@ function chatView(){
 }
 function setChatCriteria(key,value){
   state.chatCriteria[key]=value;
+  if(key==="currency"){
+    document.querySelectorAll("[data-budget-currency]").forEach(label=>label.textContent=value);
+    document.getElementById("chatInput").placeholder=`Npr. Beograd do 3000 ${value}`;
+  }
 }
 function numeric(value){
   const parsed=parseInt(String(value).replace(/[^\d]/g,""),10);
@@ -1035,14 +1046,14 @@ function budgetText(){
   if(min&&max) return `${money(min)}-${money(max)}`;
   if(max) return `do ${money(max)}`;
   if(min) return `od ${money(min)}`;
-  return "bez zadatog budžeta";
+  return `bez zadatog budžeta (${state.chatCriteria.currency})`;
 }
 function recommendationText(){
   const matches=recommendEvents();
   const budget=budgetText();
   if(!matches.length) return `Ne nalazim draft događaje za ${state.chatCriteria.city} u lokalnom katalogu.`;
   const names=matches.slice(0,4).map(e=>`${e.artist} (${shortDate(e.date)})`).join(", ");
-  return `Za ${state.chatCriteria.city} nalazim ${matches.length} draft događaja: ${names}. Budžet je ${budget}, ali nijedan od ovih događaja nema verifikovanu cenu, pa ne mogu da tvrdim da se uklapa u taj raspon. Preporuka za demo: prikaži ih kao kandidate i traži admin proveru cene pre bilo kakve prodaje.`;
+  return `Za ${state.chatCriteria.city} nalazim ${matches.length} draft događaja: ${names}. Budžet je ${budget}, ali nijedan od ovih događaja nema verifikovanu cenu, pa ne mogu da potvrdim da se uklapa u izabrani budžet. Preporuka za demo: prikaži ih kao kandidate i traži admin proveru cene pre bilo kakve prodaje.`;
 }
 function recommendationCard(event){
   return `<article class="rec-card">
@@ -1071,6 +1082,8 @@ function parseChatCriteria(text){
   const lower=text.toLowerCase();
   const city=cities.find(candidate=>candidate!=="Svi gradovi"&&lower.includes(candidate.toLowerCase()));
   if(city) state.chatCriteria.city=city;
+  const currency=text.match(/\b(RSD|EUR|BAM)\b/i)?.[1];
+  if(currency) state.chatCriteria.currency=currency.toUpperCase();
   const numbers=text.match(/\d[\d.\s]*/g)?.map(n=>numeric(n)).filter(Boolean)||[];
   if(numbers.length>=2){
     state.chatCriteria.minPrice=String(Math.min(...numbers));
